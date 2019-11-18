@@ -2,6 +2,7 @@ elpa
 auto-save-list
 recentf
 
+ido.last
 # Compiled
 README.el
 *.elc
