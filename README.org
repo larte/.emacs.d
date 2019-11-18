@@ -1,0 +1,305 @@
+#+STARTUP: overview
+#+PROPERTY: header-args :comments yes :results siletn
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+(defun require-package (package)
+  "Install given PACKAGE."
+  (unless (package-installed-p package)
+    (unless (assoc package package-archive-contents)
+      (package-refresh-contents))
+    (package-install package)))
+#+END_SRC
+
+
+* Interface
+  #+BEGIN_SRC emacs-lisp
+
+   ;; hide menus and bars
+   (menu-bar-mode 0)
+   (tool-bar-mode 0)
+   (scroll-bar-mode 0)
+   (require-package 'tango-plus-theme)
+   (use-package tango-plus-theme
+     :config
+     (load-theme 'tango-plus t))
+
+   (use-package aggressive-indent
+    :ensure t
+    :config
+     (global-aggressive-indent-mode 1)
+     (add-to-list 'aggressive-indent-excluded-modes 'html-mode)
+    )
+
+  #+END_SRC
+
+* Extra packages
+  #+BEGIN_SRC emacs-lisp
+   (require-package 'dot-mode)
+   (require-package 'elixir-mode)
+   (require-package 'erlang)
+   (require-package 'js2-mode)
+   (require-package 'markdown-mode)
+   (require-package 'nginx-mode)
+   (require-package 'terraform-mode)
+   (require-package 'yaml-mode)
+   (require-package 'feature-mode)
+  #+END_SRC
+* Search things
+  #+BEGIN_SRC emacs-lisp
+    (use-package counsel
+     :ensure t
+     :bind
+     (("M-y" . counsel-yank-pop)
+      :map ivy-minibuffer-map
+      ("M-y" . ivy-next-line)))
+
+     (use-package ivy
+     :ensure t
+     :diminish (ivy-mode)
+     :bind (("C-x b" . ivy-switch-buffer))
+     :config
+     (ivy-mode 1)
+     (setq ivy-use-virtual-buffers t)
+     (setq ivy-count-format "%d/%d ")
+     (setq ivy-display-style 'fancy))
+
+
+     (use-package swiper
+     :ensure t
+     :bind (("C-s" . swiper-isearch)
+      ("C-r" . swiper-isearch)
+       ("C-c C-r" . ivy-resume)
+        ("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file))
+     :config
+     (progn
+       (ivy-mode 1)
+       (setq ivy-use-virtual-buffers t)
+       (setq ivy-display-style 'fancy)
+       (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+       ))
+  #+END_SRC
+
+* Flycheck
+  #+BEGIN_SRC emacs-lisp
+    (use-package flycheck
+     :ensure t
+     :init
+     (global-flycheck-mode t))
+  #+END_SRC
+
+* Parens
+
+  #+BEGIN_SRC emacs-lisp
+    (use-package smartparens
+     :ensure t
+     :hook (prog-mode . smartparens-mode)
+     :custom
+      (sp-escape-quotes-after-insert nil)
+     :config
+     (require 'smartparens-config))
+
+     (show-paren-mode t)
+  #+END_SRC
+
+* LSP
+
+  #+BEGIN_SRC emacs-lisp
+   (use-package lsp-mode
+    :ensure t
+    :commands lsp
+    :custom
+    (lsp-auto-guess-root nil)
+    (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
+    :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
+    :hook ((python-mode c-mode c++-mode) . lsp))
+
+
+     (use-package lsp-ui
+       :after lsp-mode
+       :diminish
+       :commands lsp-ui-mode
+       :custom-face
+       (lsp-ui-doc-background ((t (:background nil))))
+       (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
+       :bind (:map lsp-ui-mode-map
+                   ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+                   ([remap xref-find-references] . lsp-ui-peek-find-references)
+                   ("C-c u" . lsp-ui-imenu))
+       :custom
+       (lsp-ui-doc-enable t)
+       (lsp-ui-doc-header t)
+       (lsp-ui-doc-include-signature t)
+       (lsp-ui-doc-position 'top)
+       (lsp-ui-doc-border (face-foreground 'default))
+       (lsp-ui-sideline-enable nil)
+       (lsp-ui-sideline-ignore-duplicate t)
+       (lsp-ui-sideline-show-code-actions nil)
+       :config
+       ;; Use lsp-ui-doc-webkit only in GUI
+       (setq lsp-ui-doc-use-webkit t)
+       ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
+       ;; https://github.com/emacs-lsp/lsp-ui/issues/243
+       (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
+         (setq mode-line-format nil)))
+  #+END_SRC
+
+* Company
+  #+BEGIN_SRC emacs-lisp
+     (use-package company
+     :ensure t
+     :config
+     (setq company-idle-delay 0)
+     (setq company-minimum-prefix-length 3)
+
+     (global-company-mode t)
+     )
+
+     (use-package company-lsp
+       :ensure t
+       :config
+     (setq compnay-lsp-enable-snippet t)
+      (push 'company-lsp company-backends)
+     )
+   #+END_SRC
+
+* Kubernetes context
+  #+BEGIN_SRC emacs-lisp
+    (setq custom-k8s-config "~/.kube/config")
+    (setq custom-k8s-current-context "N/A")
+
+    (defun custom-k8s-readlines ()
+       (with-temp-buffer
+         (insert-file-contents custom-k8s-config)
+         (split-string (buffer-string) "\n" t)))
+
+     (defun custom-k8s-get-context ()
+       (mapcar
+        'custom-k8s-matchline
+               (custom-k8s-readlines)))
+
+     (defun custom-k8s-matchline (line)
+       (save-match-data
+         (and (string-match "current-context: \\(.*\\)" line)
+              (setq custom-k8s-current-context (match-string 1 line)))))
+
+
+     (defun custom-k8s-context ()
+       (interactive)
+       (custom-k8s-get-context)
+       (format "%s" custom-k8s-current-context)
+       )
+
+  #+END_SRC
+
+* Modeline
+  #+BEGIN_SRC emacs-lisp
+    (require-package 'telephone-line)
+    (require 'cl)
+
+    (use-package telephone-line
+       :ensure t
+       :config
+       (use-package telephone-line-utils)
+       (use-package telephone-line-separators)
+       (if window-system
+           (setq telephone-line-primary-left-separator 'telephone-line-halfcos-left)
+         (setq telephone-line-primary-right-separator 'telephone-line-cubed-right)
+         )
+
+
+       (use-package telephone-line-segments)
+
+
+       (telephone-line-defsegment k8s-segment ()
+         (format "k8s: %s" (custom-k8s-context))
+         )
+
+       (setq telephone-line-lhs
+             '((evil   . (k8s-segment))
+               (accent . (telephone-line-vc-segment
+                          telephone-line-process-segment))
+               (nil . (telephone-line-buffer-segment))))
+
+       (telephone-line-mode 1)
+       )
+  #+END_SRC
+
+* Go
+  #+BEGIN_SRC emacs-lisp
+    (require-package 'go-mode)
+    (add-hook 'before-save-hook #'gofmt-before-save)
+    (add-to-list 'exec-path (expand-file-name "~/go/bin/godef") )
+  #+END_SRC
+
+* Automodes
+  #+BEGIN_SRC emacs-lisp
+
+  (setq auto-mode-alist
+      (append '(
+                ("\\.cpp$"       . c++-mode)
+                ("\\.cxx$"       . c++-mode)
+                ("\\.hxx$"       . c++-mode)
+                ("\\.hpp$"       . c++-mode)
+                ("\\.h$"         . c-mode)
+                ("\\.hh$"        . c++-mode)
+                ("\\.idl$"       . c++-mode)
+                ("\\.ipp$"       . c++-mode)
+                ("\\.pp$"       . puppet-mode)
+                ("\\.erl$"       . erlang-mode)
+                ("\\.ex[s]?$"       . elixir-mode)
+                ("\\.elixir$"       . elixir-mode)
+                ("\\.c$"         . c-mode)
+                ("\\.pl$"        . perl-mode)
+                ("\\.pm$"        . perl-mode)
+                ("\\.java$"      . java-mode)
+                ("\\.js$"        . js-mode)
+                ("\\.dot$"        . dot-mode)
+                ("\\.inc$"       . php-mode)
+                ("\\.php$"       . php-mode)
+                ("\\.hs$"       . haskell-mode)
+                ("\\.hi$"       . haskell-mode)
+                ("\\.go$"       . go-mode)
+                ("\\.groovy$"       . groovy-mode)
+                ("\\.lhs$"       . haskell-mode)
+                ("\\.ml[ily]?$" . tuareg-mode)
+                ("\\.tf" . terraform-mode)
+                ("\\.topml$" . tuareg-mode)
+                ("\\.txt$"       . text-mode)
+                ("\\.http$"       . restclient-mode)
+                ("\\.rb$"        . ruby-mode)
+                ("\\.rbw$"       . ruby-mode)
+                ("\\.yaml$"        . yaml-mode)
+                ("\\.yml$"       . yaml-mode)
+                ("\\.sql$"       . sql-mode)
+                ("\\.rake$"       . ruby-mode)
+                ("\\Rakefile$"    . ruby-mode)
+                ("\\spec.rb$"    . rspec-mode)
+                ("\\.feature$"   . cucumber-mode)
+                ("\\.el$"   . lisp-mode)
+                ("\\.html$" . web-mode)
+                ("\\.*nginx.*\.conf$" . nginx-mode)
+                ("\\.conf$" . conf-mode)
+                ("\\.rhtml$"      . web-mode)
+                ("\\.erb$"      . web-mode)
+                ("\\.css$"       . css-mode)
+                ("\\.occ$"       . occam-mode)
+                ("\\.scsh$"      . scheme-mode)
+                ("\\.m$"         . objc-mode)
+                ("\\TODO$"         . org-mode)
+                ("\\.org$"         . org-mode)
+                ("\\.mm$"         . objc-mode)
+                ("\\.md$"         . markdown-mode)
+                ("\\.MD$"         . markdown-mode)
+                ("\\.feature$"    . feature-mode)
+                ("\\.markdown$"         . markdown-mode))
+              auto-mode-alist))
+
+              (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+
+  #+END_SRC
+* Fun
+ #+BEGIN_SRC emacs-lisp
+
+ #+END_SRC

@@ -1,4 +1,9 @@
+elpa
+auto-save-list
+recentf
+
 # Compiled
+README.el
 *.elc
 
 # Packaging
