@@ -52,6 +52,7 @@
   )
 
 (tangle-if-newer babel-file)
+;;(load-file (babel-el-name babel-file))
 (compile-and-load (babel-el-name babel-file))
 
 (custom-set-variables

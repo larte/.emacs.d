@@ -2,6 +2,7 @@
 #+PROPERTY: header-args :comments yes :results siletn
 
 #+BEGIN_SRC emacs-lisp
+(require 'use-package)
 (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 (defun require-package (package)
   "Install given PACKAGE."
@@ -19,6 +20,65 @@
    (menu-bar-mode 0)
    (tool-bar-mode 0)
    (scroll-bar-mode 0)
+   (line-number-mode 1)
+   (column-number-mode 1)
+
+   (fset 'yes-or-no-p 'y-or-n-p)
+
+
+   ;;
+   (set-charset-priority 'unicode)
+   (prefer-coding-system 'utf-8)
+   (set-language-environment 'utf-8)
+   (set-terminal-coding-system 'utf-8)
+   (set-keyboard-coding-system 'utf-8)
+   (set-selection-coding-system 'utf-8)
+   (setq buffer-file-coding-system 'utf-8)
+   (setq locale-coding-system 'utf-8)
+
+   ;; newlines
+   (setq require-final-newline t)
+   (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+   ;; ido-buffer
+   (require-package 'ibuffer)
+   (require-package 'ibuffer-vc)
+   (require 'ibuffer)
+   (autoload 'ibuffer "ibuffer" "List buffers." t)
+
+   (define-key global-map [(control b)] 'ibuffer)
+   ;;(defvar ido-buffer-completion-map)
+   ;;(define-key ido-buffer-completion-map [(control b)] 'ido-next-match)
+
+
+   (add-hook 'ibuffer-hook
+      (lambda ()
+        (ibuffer-vc-set-filter-groups-by-vc-root)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+         (ibuffer-do-sort-by-alphabetic))))
+
+   ;; Use human readable Size column instead of original one
+   (define-ibuffer-column size-h
+     (:name "Size" :inline t)
+     (cond
+       ((> (buffer-size) 1000000) (format "%7.3fM" (/ (buffer-size) 1000000.0)))
+       ((> (buffer-size) 1000) (format "%7.3fk" (/ (buffer-size) 1000.0)))
+       (t (format "%8d" (buffer-size)))))
+
+   (setq ibuffer-formats
+       '((mark modified read-only vc-status-mini " "
+              (name 18 18 :left :elide)
+              " "
+              (size-h 9 -1 :right)
+              " "
+              (mode 16 16 :left :elide)
+              " "
+              (vc-status 16 16 :left)
+              " "
+              filename-and-process)))
+
+
+
    (require-package 'tango-plus-theme)
    (use-package tango-plus-theme
      :config
@@ -45,6 +105,7 @@
    (require-package 'yaml-mode)
    (require-package 'feature-mode)
   #+END_SRC
+
 * Search things
   #+BEGIN_SRC emacs-lisp
     (use-package counsel
@@ -106,6 +167,7 @@
 * LSP
 
   #+BEGIN_SRC emacs-lisp
+   (require-package 'lsp-mode)
    (use-package lsp-mode
     :ensure t
     :commands lsp
@@ -115,8 +177,8 @@
     :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
     :hook ((python-mode c-mode c++-mode) . lsp))
 
-
-     (use-package lsp-ui
+    (require-package 'lsp-ui)
+    (use-package lsp-ui
        :after lsp-mode
        :diminish
        :commands lsp-ui-mode
@@ -232,7 +294,131 @@
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-to-list 'exec-path (expand-file-name "~/go/bin/godef") )
   #+END_SRC
+* Ruby
+#+BEGIN_SRC emacs-lisp
+   (require-package 'ruby-mode)
+   (require-package 'ruby-refactor)
+   (require-package 'rubocop)
+   (require-package 'exec-path-from-shell)
+   (require-package 'rvm)
 
+   (use-package rvm
+     :init
+     (rvm-use-default))
+     (setq flycheck-ruby-rubocop-executable "~/bin/rubocop-shim")
+   (use-package ruby-mode
+     :init
+     (defvar ruby-basic-offset 4)
+     (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch)
+     (add-hook 'ruby-mode-hook (lambda () (hs-minor-mode)))
+     (setq ruby-insert-encoding-magic-comment nil)
+     (add-hook 'ruby-mode-hook 'whitespace-mode)
+     (eval-after-load "hideshow"
+       '(add-to-list 'hs-special-modes-alist
+                     `(ruby-mode
+                       ,(rx (or "def" "class" "module" "do" "{" "[")) ; Block start
+                       ,(rx (or "}" "]" "end"))                       ; Block end
+                       ,(rx (or "#" "=begin"))                        ; comment start
+                       ruby-forward-sexp nil)))
+     )
+   (global-set-key (kbd "C-h") 'hs-toggle-hiding)
+#+END_SRC
+* C modes
+#+BEGIN_SRC emacs-lisp
+   (defvar c-default-style "bsd")
+   (defvar c-basic-offset 4)
+
+   (defvar c++-mode-map)
+   (defvar c++-auto-hungry-initial-state)
+   (defvar c++-delete-function)
+   (defvar c++-tab-always-indent)
+   (defvar super-tab-mode)
+   (defvar indent-tabs-mode)
+   (defvar c-indent-level)
+   (defvar c-continued-statement-offset)
+   (defvar c++-empty-arglist-indent)
+
+   (defun my-c++-mode-hook ()
+     (define-key c++-mode-map "\C-m" 'reindent-then-newline-and-indent)
+     (define-key c++-mode-map "\C-ce" 'c-comment-edit)
+     (setq c++-auto-hungry-initial-state 'none)
+     (setq c++-delete-function 'backward-delete-char)
+     (setq c++-tab-always-indent t)
+     (setq super-tab-mode t)
+     (setq indent-tabs-mode nil)
+     (setq c-indent-level 4)
+     (setq c-continued-statement-offset 4)
+     (setq c++-empty-arglist-indent 4)
+     (c-set-style "stroustrup")
+     )
+
+   (defun my-objc-mode-hook ()
+     (setq indent-tabs-mode nil)
+     ;; (setq super-tab-mode t)
+     ;; BSD-ish indentation style
+     (setq c-indent-level 4)
+     )
+
+
+   (defvar c-mode-map)
+   (defvar c-auto-hungry-initial-state)
+   (defvar c-delete-function)
+   (defvar c-tab-always-indent)
+   (defvar super-tab-mode)
+   (defvar c-indent-level)
+   (defvar c-continued-statement-offset)
+   (defvar c-brace-offset)
+   (defvar c-argdecl-indent)
+   (defvar c-label-offset)
+
+   (defun my-c-mode-hook ()
+     (setq tab-width 8)
+     (setq indent-tabs-mode nil)
+     (define-key c-mode-map "\C-m" 'reindent-then-newline-and-indent)
+     (define-key c-mode-map "\C-ce" 'c-comment-edit)
+     (setq c-auto-hungry-initial-state 'none)
+     (setq c-delete-function 'backward-delete-char)
+     (setq c-tab-always-indent t)
+     (setq super-tab-mode t)
+     ;; BSD-ish indentation style
+     (setq c-indent-level 4)
+     (setq c-continued-statement-offset 4)
+     (setq c-brace-offset -4)
+     (setq c-argdecl-indent 0)
+     (setq c-label-offset -4)
+     (c-set-style "stroustrup")
+     )
+
+   ;; Add all of the hooks...
+   (add-hook 'c++-mode-hook 'my-c++-mode-hook)
+   (add-hook 'c-mode-hook 'my-c-mode-hook)
+   (add-hook 'objc-mode-hook 'my-objc-mode-hook)
+   (add-hook 'c++-mode-hook 'show-ws-highlight-tabs)
+   (add-hook 'c++-mode-hook 'show-ws-highlight-trailing-whitespace)
+   (add-hook 'c-mode-hook 'show-ws-highlight-tabs)
+   (add-hook 'c-mode-hook 'show-ws-highlight-trailing-whitespace)
+   (add-hook 'objc-mode-hook 'show-ws-highlight-tabs)
+   (add-hook 'objc-mode-hook 'show-ws-highlight-trailing-whitespace)
+
+   ;; toggle between header and file:
+   (add-hook 'c-mode-common-hook (lambda() (local-set-key (kbd "C-c o") 'ff-find-other-file)))
+
+
+   ;; insert header guard
+   (defun insert-header-guard ()
+     (interactive)
+     (if (string-match "\\.h\\(h\\|xx\\)?$" (buffer-name))
+         (let ((header-guard
+                (upcase (replace-regexp-in-string "[-.]" "_" (buffer-name)))))
+           (save-excursion
+             (goto-char (point-min))
+             (insert "#ifndef " header-guard "_\n")
+             (insert "# define " header-guard "_\n\n")
+             (goto-char (point-max))
+             (insert "\n#endif /* !" header-guard "_ */")))
+       (message "Invalid C/C++ header file.")))
+
+#+END_SRC
 * Automodes
   #+BEGIN_SRC emacs-lisp
 
@@ -301,5 +487,52 @@
   #+END_SRC
 * Fun
  #+BEGIN_SRC emacs-lisp
+
+   (defun move-line-up ()
+     "Move up the current line."
+     (interactive)
+     (transpose-lines 1)
+     (forward-line -2)
+     (indent-according-to-mode))
+
+   (defun move-line-down ()
+     "Move down the current line."
+     (interactive)
+     (forward-line 1)
+     (transpose-lines 1)
+     (forward-line -1)
+     (indent-according-to-mode))
+
+   (global-set-key [(control shift up)]  'move-line-up)
+   (global-set-key [(control shift down)]  'move-line-down)
+   ;; moving and indenting
+   (defun move-region (start end n)
+     "Move the current region up or down by N lines."
+     (interactive "r\np")
+     (let ((line-text (delete-and-extract-region start end)))
+       (forward-line n)
+       (let ((start (point)))
+         (insert line-text)
+         (setq deactivate-mark nil)
+         (set-mark start))))
+
+   (defun move-region-up (start end n)
+     "Move the current line up by N lines."
+     (interactive "r\np")
+     (move-region start end (if (null n) -1 (- n))))
+
+   (defun move-region-down (start end n)
+     "Move the current line down by N lines."
+     (interactive "r\np")
+     (move-region start end (if (null n) 1 n)))
+
+
+   (defun iwb ()
+     "indent whole buffer"
+     (interactive)
+     (delete-trailing-whitespace)
+     (indent-region (point-min) (point-max) nil)
+     (untabify (point-min) (point-max))
+     )
 
  #+END_SRC
