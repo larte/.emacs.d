@@ -140,6 +140,16 @@
        (setq ivy-display-style 'fancy)
        (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
        ))
+
+      ;; backups
+      (setq backup-directory-alist
+        `(("." . "~/.emacs-saves")))
+      (setq delete-old-versions t
+         kept-new-versions 5
+         kept-old-versions 2
+         version-control t)
+      (setq backup-by-copying-when-linked t)
+
   #+END_SRC
 
 * Flycheck
@@ -293,7 +303,12 @@
     (require-package 'go-mode)
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-to-list 'exec-path (expand-file-name "~/go/bin/godef") )
+
+    (let ((govet (flycheck-checker-get 'go-vet 'command)))
+      (when (equal (cadr govet) "tool")
+      (setf (cdr govet) (cddr govet))))
   #+END_SRC
+
 * Ruby
 #+BEGIN_SRC emacs-lisp
    (require-package 'ruby-mode)
