@@ -104,6 +104,7 @@
    (require-package 'terraform-mode)
    (require-package 'yaml-mode)
    (require-package 'feature-mode)
+   (require-package 'magit)
   #+END_SRC
 
 * Search things
@@ -327,7 +328,6 @@
      (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch)
      (add-hook 'ruby-mode-hook (lambda () (hs-minor-mode)))
      (setq ruby-insert-encoding-magic-comment nil)
-     (add-hook 'ruby-mode-hook 'whitespace-mode)
      (eval-after-load "hideshow"
        '(add-to-list 'hs-special-modes-alist
                      `(ruby-mode
