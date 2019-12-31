@@ -105,6 +105,7 @@
    (require-package 'yaml-mode)
    (require-package 'feature-mode)
    (require-package 'goovy-mode)
+   (require-package 'magit)
   #+END_SRC
 
 * Search things
