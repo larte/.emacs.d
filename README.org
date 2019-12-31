@@ -104,6 +104,7 @@
    (require-package 'terraform-mode)
    (require-package 'yaml-mode)
    (require-package 'feature-mode)
+   (require-package 'goovy-mode)
   #+END_SRC
 
 * Search things
@@ -143,11 +144,11 @@
 
       ;; backups
       (setq backup-directory-alist
-        `(("." . "~/.emacs-saves")))
+      `(("." . "~/.emacs-saves")))
       (setq delete-old-versions t
-         kept-new-versions 5
-         kept-old-versions 2
-         version-control t)
+      kept-new-versions 5
+      kept-old-versions 2
+      version-control t)
       (setq backup-by-copying-when-linked t)
 
   #+END_SRC
@@ -327,7 +328,7 @@
      (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch)
      (add-hook 'ruby-mode-hook (lambda () (hs-minor-mode)))
      (setq ruby-insert-encoding-magic-comment nil)
-     (add-hook 'ruby-mode-hook 'whitespace-mode)
+     ;; (add-hook 'ruby-mode-hook 'whitespace-mode)
      (eval-after-load "hideshow"
        '(add-to-list 'hs-special-modes-alist
                      `(ruby-mode

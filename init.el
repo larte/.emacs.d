@@ -72,7 +72,7 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets restclient grip-mode markdown-preview-eww projectile try lsp-java default-text-scale lsp-ui-doc lsp-ui lsp-clangd virtualenvwrapper company-lsp go-mode ruby-mode company lsp-mode circe-notifications circe org-gcal mu4e-alert htmlize org-bullets which-key posframe counsel use-package spinner))))
+    (magit groovy-mode goovy-mode yasnippet-snippets restclient grip-mode markdown-preview-eww projectile try lsp-java default-text-scale lsp-ui-doc lsp-ui lsp-clangd virtualenvwrapper company-lsp go-mode ruby-mode company lsp-mode circe-notifications circe org-gcal mu4e-alert htmlize org-bullets which-key posframe counsel use-package spinner))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
