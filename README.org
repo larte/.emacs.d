@@ -1,9 +1,9 @@
 #+STARTUP: overview
-#+PROPERTY: header-args :comments yes :results siletn
+#+PROPERTY: header-args :comments yes :results silent
 
 #+BEGIN_SRC emacs-lisp
 (require 'use-package)
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+;;(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 (defun require-package (package)
   "Install given PACKAGE."
   (unless (package-installed-p package)
@@ -104,7 +104,6 @@
    (require-package 'terraform-mode)
    (require-package 'yaml-mode)
    (require-package 'feature-mode)
-   (require-package 'goovy-mode)
    (require-package 'magit)
   #+END_SRC
 
@@ -182,12 +181,15 @@
    (require-package 'lsp-mode)
    (use-package lsp-mode
     :ensure t
-    :commands lsp
+    :commands (lsp lsp-deferred)
     :custom
     (lsp-auto-guess-root nil)
     (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
     :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
-    :hook ((python-mode c-mode c++-mode) . lsp))
+    :hook (
+        (python-mode c-mode c++-mode) . lsp)
+	(go-mode . lsp-deferred)
+	)
 
     (require-package 'lsp-ui)
     (use-package lsp-ui
@@ -233,8 +235,9 @@
      (use-package company-lsp
        :ensure t
        :config
-     (setq compnay-lsp-enable-snippet t)
-      (push 'company-lsp company-backends)
+       (setq compnay-lsp-enable-snippet t)
+       (push 'company-lsp company-backends)
+       :commands company-lsp
      )
    #+END_SRC
 
@@ -305,6 +308,10 @@
     (require-package 'go-mode)
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-to-list 'exec-path (expand-file-name "~/go/bin/godef") )
+
+    (lambda ()
+    (setq indent-tabs-mode 1)
+    (setq tab-width 4))
 
     (let ((govet (flycheck-checker-get 'go-vet 'command)))
       (when (equal (cadr govet) "tool")
@@ -464,7 +471,7 @@
                 ("\\.hs$"       . haskell-mode)
                 ("\\.hi$"       . haskell-mode)
                 ("\\.go$"       . go-mode)
-                ("\\.groovy$"       . groovy-mode)
+                ;;("\\.groovy$"       . groovy-mode)
                 ("\\.lhs$"       . haskell-mode)
                 ("\\.ml[ily]?$" . tuareg-mode)
                 ("\\.tf" . terraform-mode)
@@ -553,3 +560,5 @@
      )
 
  #+END_SRC
+
+(package-archives)

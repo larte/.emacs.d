@@ -1,10 +1,6 @@
 (require 'package)
 
 (setq package-enable-at-startup nil)
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
-(add-to-list 'package-archives
-      '("gnu" . "https://elpa.gnu.org/packages/"))
 (package-initialize)
 (require 'org)
 (unless (package-installed-p 'use-package)
@@ -52,9 +48,8 @@
   )
 
 (tangle-if-newer babel-file)
-;;(load-file (babel-el-name babel-file))
-(compile-and-load (babel-el-name babel-file))
-
+(load-file (babel-el-name babel-file))
+;;(compile-and-load (babel-el-name babel-file))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
