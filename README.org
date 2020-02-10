@@ -1,8 +1,11 @@
 #+STARTUP: overview
 #+PROPERTY: header-args :comments yes :results silent
 
+* 'package' initialisation
 #+BEGIN_SRC emacs-lisp
 (require 'use-package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
 ;;(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 (defun require-package (package)
   "Install given PACKAGE."
@@ -11,7 +14,6 @@
       (package-refresh-contents))
     (package-install package)))
 #+END_SRC
-
 
 * Interface
   #+BEGIN_SRC emacs-lisp
@@ -142,15 +144,6 @@
        (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
        ))
 
-      ;; backups
-      (setq backup-directory-alist
-      `(("." . "~/.emacs-saves")))
-      (setq delete-old-versions t
-      kept-new-versions 5
-      kept-old-versions 2
-      version-control t)
-      (setq backup-by-copying-when-linked t)
-
   #+END_SRC
 
 * Flycheck
@@ -235,7 +228,7 @@
      (use-package company-lsp
        :ensure t
        :config
-       (setq compnay-lsp-enable-snippet t)
+       ;;(setq compnay-lsp-enable-snippet nil)
        (push 'company-lsp company-backends)
        :commands company-lsp
      )
@@ -306,16 +299,36 @@
 * Go
   #+BEGIN_SRC emacs-lisp
     (require-package 'go-mode)
+    (require-package 'gotest)
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-to-list 'exec-path (expand-file-name "~/go/bin/godef") )
 
-    (lambda ()
-    (setq indent-tabs-mode 1)
-    (setq tab-width 4))
+   (defun go-switch-other-file ()
+     (interactive)
+     (setq ff-search-directories '(".")
+           ff-other-file-alist '(("_test\\.go$" (".go"))
+                                ("\\.go$" ("_test.go"))))
+      (ff-find-other-file)
+      )
+
+
+    (add-hook 'go-mode-hook
+      (lambda ()
+        (setq indent-tabs-mode 1)
+        (setq tab-width 4)
+	(define-key go-mode-map (kbd "C-x f") 'go-test-current-file)
+	(define-key go-mode-map (kbd "C-x t") 'go-test-current-test)
+	(define-key go-mode-map (kbd "C-x p") 'go-test-current-project)
+	(define-key go-mode-map (kbd "C-x x") 'go-run)
+	(define-key go-mode-map (kbd "C-x l") 'go-switch-other-file)
+	))
+
 
     (let ((govet (flycheck-checker-get 'go-vet 'command)))
       (when (equal (cadr govet) "tool")
       (setf (cdr govet) (cddr govet))))
+
+    (setq lsp-gopls-server-path "/home/larte/go/bin/gopls")
   #+END_SRC
 
 * Ruby
@@ -443,6 +456,29 @@
        (message "Invalid C/C++ header file.")))
 
 #+END_SRC
+
+* Backups
+#+BEGIN_SRC emacs-lisp
+(setf
+ make-backup-files t
+ backup-by-copying nil
+ version-control t
+ kept-old-versions 10000
+ kept-new-versions kept-old-versions
+ backup-directory-alist `(("." . ,(expand-file-name "~/.backups"))))
+
+#+END_SRC
+
+* Org
+#+BEGIN_SRC emacs-lisp
+(require-package 'poet-theme)
+(require-package 'load-theme-buffer-local)
+(add-hook 'org-mode-hook
+(lambda() (
+(load-theme-buffer-local 'poet (current-buffer)))))
+(add-hook 'text-mode-hook
+(lambda () (variable-pitch-mode 1)))
+#+END_SRC
 * Automodes
   #+BEGIN_SRC emacs-lisp
 
@@ -509,6 +545,7 @@
               (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
 
   #+END_SRC
+
 * Fun
  #+BEGIN_SRC emacs-lisp
 
@@ -550,7 +587,6 @@
      (interactive "r\np")
      (move-region start end (if (null n) 1 n)))
 
-
    (defun iwb ()
      "indent whole buffer"
      (interactive)
@@ -560,5 +596,3 @@
      )
 
  #+END_SRC
-
-(package-archives)
