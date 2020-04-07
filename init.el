@@ -1,10 +1,6 @@
 (require 'package)
 
 (setq package-enable-at-startup nil)
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
-(add-to-list 'package-archives
-      '("gnu" . "https://elpa.gnu.org/packages/"))
 (package-initialize)
 (require 'org)
 (unless (package-installed-p 'use-package)
@@ -52,9 +48,8 @@
   )
 
 (tangle-if-newer babel-file)
-;;(load-file (babel-el-name babel-file))
-(compile-and-load (babel-el-name babel-file))
-
+(load-file (babel-el-name babel-file))
+;;(compile-and-load (babel-el-name babel-file))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -62,7 +57,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("604ac011fc9bd042bc041330b3a5e5a86e764a46f7e9fe13e2a1f9f83bf44327" "9fe9a86557144c43f9008daaf4bbee29498e30a3d957f6cf42b63b35cf598fd1" default)))
+    ("6973f93f55e4a6ef99aa34e10cd476bc59e2f0c192b46ec00032fe5771afd9ad" "604ac011fc9bd042bc041330b3a5e5a86e764a46f7e9fe13e2a1f9f83bf44327" "9fe9a86557144c43f9008daaf4bbee29498e30a3d957f6cf42b63b35cf598fd1" default)))
  '(org-confirm-babel-evaluate nil)
  '(org-directory "~/org")
  '(org-export-html-postamble nil)
@@ -72,7 +67,7 @@
  '(org-startup-indented t)
  '(package-selected-packages
    (quote
-    (groovy-mode mustache-mode rjsx-mode yasnippet-snippets restclient grip-mode markdown-preview-eww projectile try lsp-java default-text-scale lsp-ui-doc lsp-ui lsp-clangd virtualenvwrapper company-lsp go-mode ruby-mode company lsp-mode circe-notifications circe org-gcal mu4e-alert htmlize org-bullets which-key posframe counsel use-package spinner))))
+    (gotest load-theme-buffer-local poet-theme magit groovy-mode goovy-mode yasnippet-snippets restclient grip-mode markdown-preview-eww projectile try lsp-java default-text-scale lsp-ui-doc lsp-ui lsp-clangd virtualenvwrapper company-lsp go-mode ruby-mode company lsp-mode circe-notifications circe org-gcal mu4e-alert htmlize org-bullets which-key posframe counsel use-package spinner))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

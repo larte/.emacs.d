@@ -1,9 +1,12 @@
 #+STARTUP: overview
-#+PROPERTY: header-args :comments yes :results siletn
+#+PROPERTY: header-args :comments yes :results silent
 
+* 'package' initialisation
 #+BEGIN_SRC emacs-lisp
 (require 'use-package)
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+;;(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 (defun require-package (package)
   "Install given PACKAGE."
   (unless (package-installed-p package)
@@ -11,7 +14,6 @@
       (package-refresh-contents))
     (package-install package)))
 #+END_SRC
-
 
 * Interface
   #+BEGIN_SRC emacs-lisp
@@ -142,15 +144,6 @@
        (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
        ))
 
-      ;; backups
-      (setq backup-directory-alist
-        `(("." . "~/.emacs-saves")))
-      (setq delete-old-versions t
-         kept-new-versions 5
-         kept-old-versions 2
-         version-control t)
-      (setq backup-by-copying-when-linked t)
-
   #+END_SRC
 
 * Flycheck
@@ -181,12 +174,15 @@
    (require-package 'lsp-mode)
    (use-package lsp-mode
     :ensure t
-    :commands lsp
+    :commands (lsp lsp-deferred)
     :custom
     (lsp-auto-guess-root nil)
     (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
     :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
-    :hook ((python-mode c-mode c++-mode) . lsp))
+    :hook (
+        (python-mode c-mode c++-mode) . lsp)
+	(go-mode . lsp-deferred)
+	)
 
     (require-package 'lsp-ui)
     (use-package lsp-ui
@@ -232,8 +228,9 @@
      (use-package company-lsp
        :ensure t
        :config
-     (setq compnay-lsp-enable-snippet t)
-      (push 'company-lsp company-backends)
+       ;;(setq compnay-lsp-enable-snippet nil)
+       (push 'company-lsp company-backends)
+       :commands company-lsp
      )
    #+END_SRC
 
@@ -302,12 +299,36 @@
 * Go
   #+BEGIN_SRC emacs-lisp
     (require-package 'go-mode)
+    (require-package 'gotest)
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-to-list 'exec-path (expand-file-name "~/go/bin/godef") )
+
+   (defun go-switch-other-file ()
+     (interactive)
+     (setq ff-search-directories '(".")
+           ff-other-file-alist '(("_test\\.go$" (".go"))
+                                ("\\.go$" ("_test.go"))))
+      (ff-find-other-file)
+      )
+
+
+    (add-hook 'go-mode-hook
+      (lambda ()
+        (setq indent-tabs-mode 1)
+        (setq tab-width 4)
+	(define-key go-mode-map (kbd "C-x f") 'go-test-current-file)
+	(define-key go-mode-map (kbd "C-x t") 'go-test-current-test)
+	(define-key go-mode-map (kbd "C-x p") 'go-test-current-project)
+	(define-key go-mode-map (kbd "C-x x") 'go-run)
+	(define-key go-mode-map (kbd "C-x l") 'go-switch-other-file)
+	))
+
 
     (let ((govet (flycheck-checker-get 'go-vet 'command)))
       (when (equal (cadr govet) "tool")
       (setf (cdr govet) (cddr govet))))
+
+    (setq lsp-gopls-server-path "/home/larte/go/bin/gopls")
   #+END_SRC
 
 * Ruby
@@ -328,6 +349,7 @@
      (add-hook 'ruby-mode-hook 'ruby-refactor-mode-launch)
      (add-hook 'ruby-mode-hook (lambda () (hs-minor-mode)))
      (setq ruby-insert-encoding-magic-comment nil)
+     ;; (add-hook 'ruby-mode-hook 'whitespace-mode)
      (eval-after-load "hideshow"
        '(add-to-list 'hs-special-modes-alist
                      `(ruby-mode
@@ -434,6 +456,29 @@
        (message "Invalid C/C++ header file.")))
 
 #+END_SRC
+
+* Backups
+#+BEGIN_SRC emacs-lisp
+(setf
+ make-backup-files t
+ backup-by-copying nil
+ version-control t
+ kept-old-versions 10000
+ kept-new-versions kept-old-versions
+ backup-directory-alist `(("." . ,(expand-file-name "~/.backups"))))
+
+#+END_SRC
+
+* Org
+#+BEGIN_SRC emacs-lisp
+(require-package 'poet-theme)
+(require-package 'load-theme-buffer-local)
+(add-hook 'org-mode-hook
+(lambda() (
+(load-theme-buffer-local 'poet (current-buffer)))))
+(add-hook 'text-mode-hook
+(lambda () (variable-pitch-mode 1)))
+#+END_SRC
 * Automodes
   #+BEGIN_SRC emacs-lisp
 
@@ -462,7 +507,7 @@
                 ("\\.hs$"       . haskell-mode)
                 ("\\.hi$"       . haskell-mode)
                 ("\\.go$"       . go-mode)
-                ("\\.groovy$"       . groovy-mode)
+                ;;("\\.groovy$"       . groovy-mode)
                 ("\\.lhs$"       . haskell-mode)
                 ("\\.ml[ily]?$" . tuareg-mode)
                 ("\\.tf" . terraform-mode)
@@ -500,6 +545,7 @@
               (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
 
   #+END_SRC
+
 * Fun
  #+BEGIN_SRC emacs-lisp
 
@@ -540,7 +586,6 @@
      "Move the current line down by N lines."
      (interactive "r\np")
      (move-region start end (if (null n) 1 n)))
-
 
    (defun iwb ()
      "indent whole buffer"
