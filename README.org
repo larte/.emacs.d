@@ -18,6 +18,7 @@
 * Interface
   #+BEGIN_SRC emacs-lisp
 
+   (setq inhibit-splash-screen t)
    ;; hide menus and bars
    (menu-bar-mode 0)
    (tool-bar-mode 0)
