@@ -235,6 +235,17 @@
      )
    #+END_SRC
 
+* Typescript
+#+BEGIN_SRC emacs-lisp
+(require-package 'typescript-mode)
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :init (setq tide-format-options '(:indentSize 2 :tabSize 2))
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+#+END_SRC
 * Kubernetes context
   #+BEGIN_SRC emacs-lisp
     (setq custom-k8s-config "~/.kube/config")
