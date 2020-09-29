@@ -2,7 +2,7 @@
 #+AUTHOR: larte
 #+PROPERTY: header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
 
-My [doom-emacs]() config..
+My [doom-emacs](https://github.com/hlissner/doom-emacs) config..
 
 * Basics
 #+BEGIN_SRC emacs-lisp
@@ -19,7 +19,7 @@ It's useful to have some basic personal information
 
 ** Theme
 #+BEGIN_SRC emacs-lisp
-(setq doom-theme 'doom-dark+)
+(setq doom-theme 'doom-acario-dark)
 
 (setq doom-font (font-spec :family "Input Mono Narrow" :size 12 :weight 'semi-light)
       doom-variable-pitch-font (font-spec :family "Fira Sans") ; inherits \deltaoom-font''s :size
