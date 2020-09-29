@@ -1,5 +1,7 @@
 ;;; init.el -*- lexical-binding: t; -*-
-
+(defvar +literate-config-file
+  (concat doom-private-dir "Readme.org")
+    "The file path of your literate config file.")
 (doom! :input
 
        :completion
