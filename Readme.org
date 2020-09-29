@@ -2,7 +2,7 @@
 #+AUTHOR: larte
 #+PROPERTY: header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
 
-Doom, without being evil.
+My [doom-emacs]() config..
 
 * Basics
 #+BEGIN_SRC emacs-lisp
@@ -19,8 +19,7 @@ It's useful to have some basic personal information
 
 ** Theme
 #+BEGIN_SRC emacs-lisp
-(setq doom-theme 'doom-acario-light)
-(load-theme 'doom-dark+ t)
+(setq doom-theme 'doom-dark+)
 
 (setq doom-font (font-spec :family "Input Mono Narrow" :size 12 :weight 'semi-light)
       doom-variable-pitch-font (font-spec :family "Fira Sans") ; inherits \deltaoom-font''s :size
@@ -30,15 +29,9 @@ It's useful to have some basic personal information
 #+END_SRC
 
 ** Defaults
-***
-#+BEGIN_SRC emacs-lisp
-(setq
- js-indent-level 2
- typescript-indent-level 2
-)
-#+END_SRC
+
 *** Pretty symbols in code
-I like these disabled
+I like these disabled:
 
 #+BEGIN_SRC emacs-lisp
 (setq +pretty-code-enabled-modes nil)
@@ -87,6 +80,10 @@ This leached from https://github.com/tecosaur/emacs-config
 #+END_SRC
 ** Typescript
 #+BEGIN_SRC emacs-lisp
+(setq
+ js-indent-level 2
+ typescript-indent-level 2
+)
 (use-package! typescript-mode)
 (use-package! tide
     :ensure t
