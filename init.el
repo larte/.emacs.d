@@ -1,79 +1,173 @@
-(require 'package)
+;;; init.el -*- lexical-binding: t; -*-
 
-(setq package-enable-at-startup nil)
-(package-initialize)
-(require 'org)
+(doom! :input
 
-;; add melpa stable
-(add-to-list 'package-archives
-         '("melpa-stable" . "https://stable.melpa.org/packages/"))
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+       :completion
+       (company            
+        +childframe)           
+       (ivy                
+        +icons             
+        +prescient) 
 
-(setq babel-file (expand-file-name "~/.emacs.d/README.org"))
+       :ui
+       ;;deft              ; notational velocity for Emacs
+       doom              ; what makes DOOM look the way it does
+       doom-dashboard    ; a nifty splash screen for Emacs
+       doom-quit         ; DOOM quit-message prompts when you quit Emacs
+       ;;fill-column       ; a `fill-column' indicator
+       hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
+       ;;hydra
+       ;; indent-guides     ; highlighted indent columns, notoriously slow
+       modeline          ; snazzy, Atom-inspired modeline, plus API
+       nav-flash         ; blink the current line after jumping
+       ;;neotree           ; a project drawer, like NERDTree for vim
+       ophints           ; highlight the region an operation acts on
+       (popup            ; tame sudden yet inevitable temporary windows
+        +all             ; catch all popups that start with an asterix
+        +defaults)       ; default popup rules
+       pretty-code       ; replace bits of code with pretty symbols
+       ;; (tabs             ; an tab bar for Emacs
+       ;;   +centaur-tabs)  ; ... with prettier tabs
+       treemacs          ; a project drawer, like neotree but cooler
+       ;;unicode           ; extended unicode support for various languages
+       vc-gutter         ; vcs diff in the fringe
+       vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+       (window-select +numbers)     ; visually switch windows
+       workspaces        ; tab emulation, persistence & separate workspaces
+       zen               ; distraction-free coding or writing
 
-;; Compile helpers
-(defun elc-name (name)
-  (replace-regexp-in-string "\\.el$" ".elc" name)
-  )
+       :editor
+       ;;(evil +everywhere); come to the dark side, we have cookies
+       file-templates    ; auto-snippets for empty files
+       fold              ; (nigh) universal code folding
+       (format +onsave)  ; automated prettiness
+       ;;god               ; run Emacs commands without modifier keys
+       ;;lispy             ; vim for lisp, for people who don't like vim
+       multiple-cursors  ; editing in many places at once
+       ;;objed             ; text object editing for the innocent
+       ;;parinfer          ; turn lisp into python, sort of
+       rotate-text       ; cycle region at point between text candidates
+       snippets          ; my elves. They type so I don't have to
+       ;;word-wrap         ; soft wrapping with language-aware indent
 
-(defun babel-el-name (name)
-  (replace-regexp-in-string "\\.org$" ".el" name)
-  )
+       :emacs
+       (dired +icons)             ; making dired pretty [functional]
+       electric          ; smarter, keyword-based electric-indent
+       (ibuffer +icons)           ; interactive buffer management
+       vc                ; version-control and Emacs, sitting in a tree
 
-(defun compile-if-newer (name)
-  "Try to compile given .el file if changes were made."
-  (if (file-exists-p (elc-name name))
-      (if (file-newer-than-file-p name (elc-name name))
-          (byte-compile-file name)
-        )
-    (byte-compile-file name)
-    )
-  )
+       :term
+       ;;eshell            ; a consistent, cross-platform shell (WIP)
+       ;;shell             ; a terminal REPL for Emacs
+       ;;term              ; terminals in Emacs
+       vterm             ; another terminals in Emacs
 
-(defun tangle-if-newer (name)
-  "Try to tangle README.org if there's changes"
-  (setq output (babel-el-name name))
-  (if (file-exists-p output)
-      (if (file-newer-than-file-p name output)
-          ;; do tangle please
-          (org-babel-tangle-file name output)
-        )
-    (org-babel-tangle-file name output)
-    )
-  )
+       :checkers
+       syntax              ; tasing you for every semicolon you forget
+       spell             ; tasing you for misspelling mispelling
+       grammar           ; tasing grammar mistake every you make
 
+       :tools
+       ansible
+       debugger          ; FIXME stepping through code, to help you add bugs
+       ;;direnv
+       ;;docker
+       ;;editorconfig      ; let someone else argue about tabs vs spaces
+       ;;ein               ; tame Jupyter notebooks with emacs
+       (eval +overlay)     ; run code, run (also, repls)
+       ;;gist              ; interacting with github gists
+       (lookup           ; helps you navigate your code and documentation
+        +dictionary      ; dictionary/thesaurus is nice
+        +docsets)        ; ...or in Dash docsets locally
+       lsp
+       ;;macos             ; MacOS-specific commands
+       magit             ; a git porcelain for Emacs
+       make              ; run make tasks from Emacs
+       ;;pass              ; password manager for nerds
+       pdf               ; pdf enhancements
+       ;;prodigy           ; FIXME managing external services & code builders
+       rgb               ; creating color strings
+       terraform         ; infrastructure as code
+       ;;tmux              ; an API for interacting with tmux
+       upload            ; map local to remote projects via ssh/ftp
 
-(defun compile-and-load (name)
-  "Try to compile given .el file if changes were made. load file."
-  (compile-if-newer name)
-  (load (elc-name name))
-  )
+       :lang
+       ;;agda              ; types of types of types of types...
+       ;;assembly          ; assembly for fun or debugging
+       cc                ; C/C++/Obj-C madness
+       ;;clojure           ; java with a lisp
+       ;;common-lisp       ; if you've seen one lisp, you've seen them all
+       ;;coq               ; proofs-as-programs
+       ;;crystal           ; ruby at the speed of c
+       ;;csharp            ; unity, .NET, and mono shenanigans
+       data              ; config/data formats
+       elixir            ; erlang done right
+       ;;elm               ; care for a cup of TEA?
+       emacs-lisp        ; drown in parentheses
+       erlang            ; an elegant language for a more civilized age
+       ess               ; emacs speaks statistics
+       ;;faust             ; dsp, but you get to keep your soul
+       ;;fsharp           ; ML stands for Microsoft's Language
+       (go +lsp)                ; the hipster dialect
+       ;;(haskell +dante)  ; a language that's lazier than I am
+       ;;hy                ; readability of scheme w/ speed of python
+       ;;idris             ;
+       ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
+       (javascript
+        +pretty-code-symbols nil
+        )       ; all(hope(abandon(ye(who(enter(here))))))
+       ;;julia             ; a better, faster MATLAB
+       ;;kotlin            ; a better, slicker Java(Script)
+       (latex             ; writing papers in Emacs has never been so fun
+        +latexmk         ; what else would you use?
+        +cdlatex         ; quick maths symbols
+        +fold)           ; TeX-fold nicities
+       ;;lean
+       ;;factor
+       ledger            ; an accounting system in Emacs
+       ;;lua               ; one-based indices? one-based indices
+       markdown          ; writing docs for people to ignore
+       ;;nim               ; python + lisp at the speed of c
+       ;;nix               ; I hereby declare "nix geht mehr!"
+       ;;ocaml             ; an objective camel
+       (org              ; organize your plain life in plain text
+        +dragndrop       ; drag & drop files/images into org buffers
+        ;;+hugo            ; use Emacs for hugo blogging
+        +jupyter         ; ipython/jupyter support for babel
+        +pandoc          ; export-with-pandoc support
+        +gnuplot         ; who doesn't like pretty pictures
+        ;;+pomodoro        ; be fruitful with the tomato technique
+        +present)        ; using org-mode for presentations
+       perl              ; write code no one else can comprehend
+       ;;php               ; perl's insecure younger brother
+       ;;plantuml          ; diagrams for confusing people more
+       ;;purescript        ; javascript, but functional
+       python           ; beautiful is better than ugly
+       ;;qt                ; the 'cutest' gui framework ever
+       ;;racket            ; a DSL for DSLs
+       rest              ; Emacs as a REST client
+       ;;rst               ; ReST in peace
+       ruby              ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       (rust +lsp)             ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       ;;scala             ; java, but good
+       ;;scheme            ; a fully conniving family of lisps
+       sh                ; she sells {ba,z,fi}sh shells on the C xor
+       ;;solidity          ; do you need a blockchain? No.
+       ;;swift             ; who asked for emoji variables?
+       ;;terra             ; Earth and Moon in alignment for performance.
+       web               ; the tubes
 
-(tangle-if-newer babel-file)
-(load-file (babel-el-name babel-file))
-;;(compile-and-load (babel-el-name babel-file))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("6973f93f55e4a6ef99aa34e10cd476bc59e2f0c192b46ec00032fe5771afd9ad" "604ac011fc9bd042bc041330b3a5e5a86e764a46f7e9fe13e2a1f9f83bf44327" "9fe9a86557144c43f9008daaf4bbee29498e30a3d957f6cf42b63b35cf598fd1" default))
- '(org-confirm-babel-evaluate nil)
- '(org-directory "~/org")
- '(org-export-html-postamble nil)
- '(org-hide-leading-stars t)
- '(org-src-fontify-natively t)
- '(org-startup-folded 'overview)
- '(org-startup-indented t)
- '(package-selected-packages
-   '(typescript-mode gotest load-theme-buffer-local poet-theme magit groovy-mode goovy-mode yasnippet-snippets restclient grip-mode markdown-preview-eww projectile try lsp-java default-text-scale lsp-ui-doc lsp-ui lsp-clangd virtualenvwrapper company-lsp go-mode ruby-mode company lsp-mode circe-notifications circe org-gcal mu4e-alert htmlize org-bullets which-key posframe counsel use-package spinner)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(lsp-ui-doc-background ((t (:background nil))))
- '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic))))))
+       :email
+       ;;(mu4e +gmail)
+       ;;notmuch
+       ;;(wanderlust +gmail)
+
+       :app
+       ;;calendar
+       ;;irc               ; how neckbeards socialize
+       ;;(rss +org)        ; emacs as an RSS reader
+       ;;twitter           ; twitter client https://twitter.com/vnought
+
+       :config
+       literate
+       (default +bindings +smartparens))
