@@ -58,6 +58,7 @@ This leached from https://github.com/tecosaur/emacs-config
 #+BEGIN_SRC emacs-lisp
 (setq fancy-splash-image (concat doom-private-dir "splash.png"))
 #+END_SRC
+
 * Language things
 
 ** Go-mode
