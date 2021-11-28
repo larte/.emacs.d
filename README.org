@@ -1,0 +1,284 @@
+
+* Emacs Config
+#+OPTIONS: toc:5
+
+** Personal Information
+
+    #+BEGIN_SRC emacs-lisp
+    (setq user-full-name "larte"
+          user-mail-address "lauri.arte@gmail.com")
+    #+END_SRC
+
+** Require package helper
+
+    #+BEGIN_SRC emacs-lisp
+    (defun require-package (package)
+      "Install given PACKAGE."
+      (unless (package-installed-p package)
+      (unless (assoc package package-archive-contents)
+      (package-refresh-contents))
+      (package-install package)))
+    #+END_SRC
+
+** Inhibitions
+
+    #+BEGIN_SRC emacs-lisp
+    (setq inhibit-startup-screen t)
+    (tool-bar-mode 0)
+    (menu-bar-mode 0)
+    (scroll-bar-mode 0)
+    (line-number-mode 1)
+    (column-number-mode 1)
+    (fset 'yes-or-no-p 'y-or-n-p)
+    (setq require-final-newline t)
+    (add-hook 'before-save-hook 'delete-trailing-whitespace)
+    #+END_SRC
+
+** Behavior
+
+   #+BEGIN_SRC emacs-lisp
+     (require-package 'ibuffer)
+     (autoload 'ibuffer "ibuffer" "List buffers." t)
+     (define-key global-map [(control b)] 'ibuffer)
+     (global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
+
+     (use-package centaur-tabs
+       :ensure
+       :config
+       (centaur-tabs-mode t)
+       (setq centaur-tabs-style "alternate")
+       (setq centaur-tabs-set-icons t)
+       (setq centaur-tabs-set-bar 'under)
+       (setq centaur-tabs-enable-key-bindings t)
+
+       )
+
+   #+END_SRC
+
+
+** Encoding
+
+    #+BEGIN_SRC emacs-lisp
+    (prefer-coding-system 'utf-8)
+    (setq coding-system-for-read 'utf-8
+      coding-system-for-write 'utf-8)
+    #+END_SRC
+
+** Theme
+
+    #+BEGIN_SRC emacs-lisp
+      (require-package 'material-theme)
+      ;;(load-theme 'material-light t nil)
+      (use-package doom-themes
+	:ensure t
+	:config
+	(load-theme 'doom-one-light t)
+	(doom-themes-visual-bell-config)
+	)
+
+      (use-package doom-modeline
+	:ensure t)
+      (doom-modeline-init)
+    #+END_SRC
+
+** Neotree
+
+       #+BEGIN_SRC emacs-lisp
+	 (require-package 'neotree)
+	 (require-package 'all-the-icons)
+	 (use-package all-the-icons)
+
+	 (use-package neotree
+	   :ensure t
+	   :config
+	   (global-set-key [f8] 'neotree-toggle)
+	   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+	   )
+    #+END_SRC
+
+
+
+** mr. Parens
+
+    #+BEGIN_SRC emacs-lisp
+    (require-package 'smartparens)
+    (use-package smartparens
+    :hook (prog-mode . smartparens-mode)
+    :custom
+    (sp-escape-quotes-after-insert nil)
+    :config
+    (require 'smartparens-config))
+    (show-paren-mode t)
+ #+END_SRC
+
+** Backups
+
+    #+BEGIN_SRC emacs-lisp
+    (setf
+      make-backup-files t
+      backup-by-copying nil
+      version-control t
+      kept-old-versions 10000
+      kept-new-versions kept-old-versions
+      backup-directory-alist `(("." . ,(expand-file-name "~/.backups"))))
+    #+END_SRC
+
+
+** Golang
+
+   #+BEGIN_SRC emacs-lisp
+   (require-package 'lsp-ui)
+   (use-package lsp-mode
+     :ensure t
+     :commands (lsp lsp-deferred)
+     :hook (go-mode . lsp-deferred))
+
+  (defun lsp-go-install-save-hooks ()
+     (add-hook 'before-save-hook #'lsp-format-buffer t t)
+     (add-hook 'before-save-hook #'lsp-organize-imports t t))
+     (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+  (use-package lsp-ui
+    :ensure t
+    :commands lsp-ui-mode
+    :init
+  )
+
+  (use-package yasnippet
+    :ensure t
+    :commands yas-minor-mode
+    :hook (go-mode . yas-minor-mode))
+
+  (setq lsp-ui-doc-enable nil
+        lsp-ui-peek-enable t
+        lsp-ui-sideline-enable t
+        lsp-ui-imenu-enable t
+        lsp-ui-flycheck-enable t)
+
+  (defun go-switch-other-file ()
+     (interactive)
+     (setq ff-search-directories '(".")
+          ff-other-file-alist '(("_test\\.go$" (".go"))
+                               ("\\.go$" ("_test.go"))))
+     			     (ff-find-other-file))
+  (require-package 'go-mode)
+  (use-package go-mode
+    :defer t
+    :ensure t
+    :mode ("\\.go\\'" . go-mode)
+    :init
+      (setq compile-command "go build -v && go test -v ./... && golint")
+      (setq compilation-read-command nil)
+    :bind (
+           ("C-x x" . #'go-run)
+           ("M-," . compile)
+           ("M-." . godef-jump)
+	   ("C-x C-l" . #'go-switch-another-file)
+	   ("C-x t" . #'go-test-current-test)
+           ("C-x f" . #'go-test-current-file)
+    ))
+   #+END_SRC
+
+** Typescript
+
+    #+BEGIN_SRC emacs-lisp
+      (require-package 'typescript-mode)
+      (require-package 'tide)
+      (require-package 'company)
+      (require-package 'graphql-mode)
+      (require-package 'flycheck)
+
+      (use-package tide :ensure t)
+      (use-package company :ensure t)
+      (use-package flycheck :ensure t)
+
+      (defun setup-tide-mode ()
+	(interactive)
+	(tide-setup)
+	(flycheck-mode +1)
+	(setq flycheck-check-syntax-automatically '(save mode-enabled))
+	(eldoc-mode +1)
+	(tide-hl-identifier-mode +1)
+	(company-mode +1))
+
+      (setq compay-tooltip-align-annotations t)
+
+      (setq
+       js-indent-level 2
+       typescript-indent-level 2
+       )
+      (use-package typescript-mode
+	:ensure t)
+      (use-package tide
+	 :ensure t
+	 :after (typescript-mode company flycheck)
+	 :init (setq tide-format-options '(:indentSize 2 :tabSize 2))
+	 :hook ((typescript-mode . #'setup-tide-mode)
+		(typescript-mode . tide-hl-identifier-mode)
+		(before-save . tide-format-before-save)))
+       (use-package graphql-mode
+	 :ensure t
+	 )
+    #+END_SRC
+
+** Automodes
+
+    #+BEGIN_SRC emacs-lisp
+    (setq auto-mode-alist
+      (append '(
+              ("\\.cpp$"       . c++-mode)
+              ("\\.cxx$"       . c++-mode)
+              ("\\.hxx$"       . c++-mode)
+              ("\\.hpp$"       . c++-mode)
+              ("\\.h$"         . c-mode)
+              ("\\.hh$"        . c++-mode)
+              ("\\.idl$"       . c++-mode)
+              ("\\.ipp$"       . c++-mode)
+              ("\\.pp$"       . puppet-mode)
+              ("\\.erl$"       . erlang-mode)
+              ("\\.ex[s]?$"       . elixir-mode)
+              ("\\.elixir$"       . elixir-mode)
+              ("\\.c$"         . c-mode)
+              ("\\.pl$"        . perl-mode)
+              ("\\.pm$"        . perl-mode)
+              ("\\.java$"      . java-mode)
+              ("\\.js$"        . js-mode)
+              ("\\.dot$"        . dot-mode)
+              ("\\.hs$"       . haskell-mode)
+              ("\\.hi$"       . haskell-mode)
+              ("\\.go$"       . go-mode)
+              ("\\.lhs$"       . haskell-mode)
+              ("\\.topml$" . tuareg-mode)
+              ("\\.txt$"       . text-mode)
+              ("\\.http$"       . restclient-mode)
+              ("\\.rb$"        . ruby-mode)
+              ("\\.rbw$"       . ruby-mode)
+              ("\\.yaml$"        . yaml-mode)
+              ("\\.yml$"       . yaml-mode)
+              ("\\.sql$"       . sql-mode)
+              ("\\.rake$"       . ruby-mode)
+              ("\\Rakefile$"    . ruby-mode)
+              ("\\spec.rb$"    . rspec-mode)
+              ("\\.feature$"   . cucumber-mode)
+              ("\\.el$"   . lisp-mode)
+              ("\\.html$" . web-mode)
+              ("\\.*nginx.*\.conf$" . nginx-mode)
+              ("\\.conf$" . conf-mode)
+              ("\\.rhtml$"      . web-mode)
+              ("\\.erb$"      . web-mode)
+              ("\\.css$"       . css-mode)
+              ("\\.occ$"       . occam-mode)
+              ("\\.scsh$"      . scheme-mode)
+              ("\\TODO$"         . org-mode)
+              ("\\.org$"         . org-mode)
+              ("\\.mm$"         . objc-mode)
+              ("\\.md$"         . markdown-mode)
+	      ("\\.ts$"         . typescript-mode)
+	      ("\\.tsx$"        . typescript-mode)
+              ("\\.MD$"         . markdown-mode)
+              ("\\.feature$"    . feature-mode)
+              ("\\.markdown$"         . markdown-mode))
+            auto-mode-alist))
+
+            (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+    #+END_SRC
