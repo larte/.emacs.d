@@ -65,8 +65,8 @@
    ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
  '(column-number-mode t)
  '(custom-safe-themes
-   '("f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "93ed23c504b202cf96ee591138b0012c295338f38046a1f3c14522d4a64d7308" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "f4876796ef5ee9c82b125a096a590c9891cec31320569fc6ff602ff99ed73dca" "16ce45f31cdea5e74ca4d27519d7ebe998d69ec3bf7df7be63c5ffdb5638b387" default))
- '(package-selected-packages '(magit use-package))
+   '("4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "93ed23c504b202cf96ee591138b0012c295338f38046a1f3c14522d4a64d7308" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "f4876796ef5ee9c82b125a096a590c9891cec31320569fc6ff602ff99ed73dca" "16ce45f31cdea5e74ca4d27519d7ebe998d69ec3bf7df7be63c5ffdb5638b387" default))
+ '(package-selected-packages '(tide magit use-package))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
 (custom-set-faces
