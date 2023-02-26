@@ -96,6 +96,15 @@
      (setq centaur-tabs-set-bar 'under)
      (setq centaur-tabs-enable-key-bindings t)
      )
+
+   (straight-use-package 'multiple-cursors)
+   (use-package multiple-cursors :ensure t)
+
+   ;; Global keybindings for multiple cursors
+   ;;(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+   (global-set-key (kbd "C-c <down>") 'mc/mark-next-like-this)
+   (global-set-key (kbd "C-c <up>") 'mc/mark-previous-like-this)
+   (global-set-key (kbd "C-c C-a") 'mc/mark-all-like-this)
  #+END_SRC
 
 ** Magit

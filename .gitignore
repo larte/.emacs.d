@@ -3,6 +3,8 @@ auto-save-list
 recentf
 elpa
 straight
+.cache
+.mc-lists.el
 
 ido.last
 # Compiled
