@@ -1,14 +1,13 @@
 elpa
 auto-save-list
 recentf
+elpa
+straight
 
 ido.last
 # Compiled
 README.el
 *.elc
-
-# Packaging
-.cask
 
 # Backup files
 *~
