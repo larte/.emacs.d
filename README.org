@@ -1,0 +1,204 @@
+* Emacs configuration
+  #+Options: toc:5
+
+
+** General
+   #+BEGIN_SRC emacs-lisp
+
+    (setq gc-cons-percentage 0.6)
+    (setq gc-cons-threshold most-positive-fixnum)
+
+    (setq custom-file (file-name-concat user-emacs-directory "custom.el"))
+   #+END_SRC
+
+** Packages
+  #+BEGIN_SRC emacs-lisp
+    (setq use-package-expand-minimally t
+      use-package-always-ensure nil
+      use-package-always-defer t
+      straight-check-for-modifications nil
+      debug-on-error t)
+    ;; URL: `https://github.com/radian-software/straight.el#getting-started'
+    (defvar bootstrap-version)
+    (let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+      (unless (file-exists-p bootstrap-file)
+        (with-current-buffer
+                (url-retrieve-synchronously
+                 "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+                 'silent 'inhibit-cookies)
+            (goto-char (point-max))
+            (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+
+  #+END_SRC
+
+** Basic
+  #+BEGIN_SRC emacs-lisp
+    (setq user-full-name "larte"
+	   user-mail-address "lauri.arte@gmail.com")
+
+    (setq warning-minimum-level :error)
+
+    (setq initial-major-mode 'fundamental-mode)
+
+    (setq make-backup-files nil
+      create-lockfiles nil
+      auto-save-default nil)
+    (setq use-short-answers t)
+
+    (setq-default indent-tabs-mode nil)
+    (setq require-final-newline t)
+    (add-hook 'before-save-hook 'delete-trailing-whitespace)
+    (prefer-coding-system 'utf-8)
+    (setq coding-system-for-read 'utf-8
+	   coding-system-for-write 'utf-8)
+    (setq scroll-step 1
+      scroll-conservatively 10000
+      auto-window-vscroll nil)
+  #+END_SRC
+
+** Appearance
+ #+BEGIN_SRC emacs-lisp
+  (straight-use-package 'doom-themes)
+  (straight-use-package 'doom-modeline)
+
+  (load-theme 'doom-dark+ t)
+  (doom-themes-visual-bell-config)
+  (if (daemonp)
+	 (add-hook 'after-make-frame-functions
+		   (lambda (frame)
+		     (with-selected-frame frame (load-theme 'doom-dark+ t))))
+       (load-theme 'doom-dark+ t))
+  ;; Set default font
+  (set-face-attribute 'default nil
+                    :family "Source Code Pro"
+                    :height 110
+                    :weight 'normal
+                    :width 'normal)
+ #+END_SRC
+
+** Behaviour
+ #+BEGIN_SRC emacs-lisp
+   (straight-use-package 'ibuffer)
+   (autoload 'ibuffer "ibuffer" "List buffers." t)
+   (define-key global-map [(control b)] 'ibuffer)
+   (global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
+
+   (straight-use-package 'centaur-tabs)
+   (use-package centaur-tabs
+     :ensure
+     :config
+     (centaur-tabs-mode t)
+     (setq centaur-tabs-style "alternate")
+     (setq centaur-tabs-set-icons t)
+     (setq centaur-tabs-set-bar 'under)
+     (setq centaur-tabs-enable-key-bindings t)
+     )
+ #+END_SRC
+
+** Magit
+  #+BEGIN_SRC emacs-lisp
+        (straight-use-package 'magit)
+        (use-package magit
+          :ensure t
+          :config
+          (add-to-list 'magit-no-confirm 'stage-all-changes)
+          (setq magit-push-always-verify nil)
+         )
+
+  #+END_SRC
+
+** Treesitter
+  #+BEGIN_SRC emacs-lisp
+    (straight-use-package 'tree-sitter)
+    (straight-use-package 'tree-sitter-langs)
+    (straight-use-package 'apheleia)
+    (use-package tree-sitter
+       :ensure t
+       :config
+       (global-tree-sitter-mode)
+       (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+    (use-package tree-sitter-langs
+      :ensure t
+      :after tree-sitter)
+
+    (use-package apheleia
+      :ensure t
+      :config
+      (apheleia-global-mode +1))
+  #+END_SRC
+
+** Typescript
+  #+BEGIN_SRC emacs-lisp
+    (straight-use-package 'typescript-mode)
+    (straight-use-package 'company)
+    (straight-use-package 'graphql-mode)
+    (straight-use-package 'flycheck)
+
+    (use-package company :ensure t)
+    (use-package flycheck :ensure t)
+        (use-package typescript-mode
+          :after tree-sitter
+          :config
+          ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+          ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+          (define-derived-mode typescriptreact-mode typescript-mode
+            "TypeScript TSX")
+
+          ;; use our derived mode for tsx files
+          (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+          ;; by default, typescript-mode is mapped to the treesitter typescript parser
+          ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
+          (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+  #+END_SRC
+
+** LSP
+  #+BEGIN_SRC emacs-lisp
+    (straight-use-package 'lsp-ui)
+    (straight-use-package 'lsp-mode)
+    (straight-use-package 'yasnippet)
+    (straight-use-package 'lsp-treemacs)
+
+    (use-package lsp-ui :ensure t)
+    (use-package js2-mode :ensure t)
+
+    (use-package lsp-mode
+      :ensure t
+      :config
+      (add-hook 'typescript-mode-hook 'lsp)
+      (add-hook 'js2-mode-hook 'lsp))
+
+    (use-package yasnippet :ensure t)
+    (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+    (setq lsp-language-id-configuration '((java-mode . "java")
+                                          (python-mode . "python")
+                                          (gfm-view-mode . "markdown")
+                                          (rust-mode . "rust")
+                                          (css-mode . "css")
+                                          (xml-mode . "xml")
+                                          (c-mode . "c")
+                                          (c++-mode . "cpp")
+                                          (web-mode . "html")
+                                          (html-mode . "html")
+                                          (sgml-mode . "html")
+                                          (mhtml-mode . "html")
+                                          (go-mode . "go")
+                                          (haskell-mode . "haskell")
+                                          (json-mode . "json")
+                                          (js2-mode . "javascript")
+                                          (typescript-mode . "typescript")))
+  #+END_SRC
+
+** Done
+  #+BEGIN_SRC emacs-lisp
+  (run-with-idle-timer 4 nil
+                     (lambda ()
+                         "Clean up gc."
+                         (setq gc-cons-threshold  67108864) ; 64M
+                         (setq gc-cons-percentage 0.1) ; original value
+                         (garbage-collect)))
+    (provide 'init)
+  #+END_SRC
