@@ -20,3 +20,4 @@ transient/*
 .lsp*
 config.el
 Readme.el
+custom.el
