@@ -3,7 +3,7 @@
 (setq gc-cons-threshold most-positive-fixnum)
 (require 'package)
 
-(setq package-enable-at-startup nil)
+(setq package-enable-at-startup t)
 (package-initialize)
 (require 'org)
 
