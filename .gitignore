@@ -2,6 +2,7 @@ elpa
 auto-save-list
 recentf
 elpa
+quelpa
 straight
 .cache
 .mc-lists.el
@@ -21,3 +22,5 @@ transient/*
 config.el
 Readme.el
 custom.el
+.local
+projects

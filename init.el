@@ -15,6 +15,13 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+;; add quelpa
+(use-package quelpa-use-package
+  :ensure t
+  :init
+  (setq quelpa-update-melpa-p nil)
+  (setq quelpa-self-upgrade-p nil))
+
 (setq babel-file (expand-file-name "~/.emacs.d/README.org"))
 
 ;; Compile helpers
