@@ -123,6 +123,18 @@
       (apheleia-global-mode +1))
   #+END_SRC
 
+** Erlang
+#+BEGIN_SRC emacs-lisp
+  (use-package erlang
+    :ensure t
+    :after tree-sitter)
+  (use-package elixir-mode
+    :ensure t
+    :after tree-sitter)
+
+
+#+END_SRC
+
 ** Typescript
   #+BEGIN_SRC emacs-lisp
     (use-package graphql-mode
@@ -175,7 +187,10 @@ copilot:
       :ensure t
       :config
       (add-hook 'typescript-mode-hook 'lsp)
-      (add-hook 'js2-mode-hook 'lsp))
+      (add-hook 'js2-mode-hook 'lsp)
+      (add-hook 'erlang-mode-hook 'lsp)
+      (add-hook 'elixir-mode-hook 'lsp)
+      )
 
     (use-package yasnippet :ensure t)
     (use-package lsp-treemacs :ensure t :commands lsp-treemacs-errors-list)
@@ -183,6 +198,7 @@ copilot:
                                           (python-mode . "python")
                                           (gfm-view-mode . "markdown")
                                           (rust-mode . "rust")
+                                          (erlang-mode . "erlang")
                                           (css-mode . "css")
                                           (xml-mode . "xml")
                                           (c-mode . "c")
