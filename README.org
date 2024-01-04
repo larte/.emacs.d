@@ -162,7 +162,31 @@
           (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
   #+END_SRC
 
-copilot:
+
+** ZIG
+
+#+BEGIN_SRC emacs-lisp
+
+  (if (eq system-type 'darwin)
+    (setq zlspath "/opt/homebrew/bin/zls")
+    (setq zlspath "~/bin/zls")
+  )
+
+  (use-package zig-mode
+      :after lsp-mode
+      :ensure t
+      :config
+      (require 'lsp)
+      (add-to-list 'lsp-language-id-configuration '(zig-mode . "zig"))
+      (lsp-register-client
+        (make-lsp-client
+          :new-connection (lsp-stdio-connection zlspath)
+          :major-modes '(zig-mode)
+          :server-id 'zls)))
+#+END_SRC
+
+** Copilot
+
 #+BEGIN_SRC emacs-lisp
     (use-package copilot
       :ensure t
@@ -186,6 +210,8 @@ copilot:
     (use-package lsp-mode
       :ensure t
       :config
+      (add-hook 'sh-mode 'lsp)
+      (add-hook 'elixir-mode 'lsp)
       (add-hook 'typescript-mode-hook 'lsp)
       (add-hook 'js2-mode-hook 'lsp)
       (add-hook 'erlang-mode-hook 'lsp)
@@ -212,6 +238,22 @@ copilot:
                                           (json-mode . "json")
                                           (js2-mode . "javascript")
                                           (typescript-mode . "typescript")))
+					  (python-mode . "python")
+					  (gfm-view-mode . "markdown")
+					  (rust-mode . "rust")
+					  (css-mode . "css")
+					  (xml-mode . "xml")
+					  (c-mode . "c")
+					  (c++-mode . "cpp")
+					  (web-mode . "html")
+					  (html-mode . "html")
+					  (sgml-mode . "html")
+					  (mhtml-mode . "html")
+					  (go-mode . "go")
+					  (haskell-mode . "haskell")
+					  (json-mode . "json")
+					  (js2-mode . "javascript")
+					  (typescript-mode . "typescript")))
   #+END_SRC
 
 ** Done
