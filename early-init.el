@@ -13,5 +13,22 @@
 
 (setq native-comp-async-report-warnings-errors 'silent)
 
-(provide 'early-init)
 
+(defmacro on-hook (name &rest body)
+  (declare (indent defun))
+  (let (found hook)
+    (setq name (if (string-match "-hook\\'" (symbol-name `,name))
+                   `,name
+                 (intern (concat (symbol-name name) "-hook"))))
+    (setq body (nreverse body))
+    (dolist (hook init-file-hooks)
+      (when (equal (symbol-name (car hook)) (symbol-name name))
+        (dolist (sexp (nreverse (cdr hook)))
+          (add-to-list 'body sexp))
+        (setcdr hook body)
+        (setq found t)))
+    (unless found
+      (add-to-list 'init-file-hooks (cons name body)))
+        (ignore)))
+
+(provide 'early-init)
