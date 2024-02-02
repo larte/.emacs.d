@@ -378,12 +378,7 @@
 
 ** Done
   #+BEGIN_SRC emacs-lisp
-
-
-    (global-set-key (kbd "<f1") #'treemacs)
-
-
-
+    (global-set-key (kbd "<f1>") #'treemacs)
     (run-with-idle-timer 4 nil
                          (lambda ()
                            "Clean up gc."
