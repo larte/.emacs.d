@@ -33,7 +33,7 @@
   (replace-regexp-in-string "\\.org$" ".el" name)
   )
 
-  (defun compile-if-newer (name)
+(defun compile-if-newer (name)
   "Try to compile given .el file if changes were made."
   (if (file-exists-p (elc-name name))
       (if (file-newer-than-file-p name (elc-name name))
@@ -62,5 +62,6 @@
   )
 
 (tangle-if-newer babel-file)
-;;(load-file (babel-el-name babel-file))
-(compile-and-load (babel-el-name babel-file))
+(load-file (babel-el-name babel-file))
+;;(compile-and-load (babel-el-name babel-file))
+

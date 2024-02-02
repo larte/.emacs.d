@@ -5,16 +5,34 @@
 ** General
    #+BEGIN_SRC emacs-lisp
 
-    (setq gc-cons-percentage 0.6)
-    (setq gc-cons-threshold most-positive-fixnum)
+     (setq gc-cons-percentage 0.6)
+     (setq gc-cons-threshold most-positive-fixnum)
 
-    (setq custom-file (file-name-concat user-emacs-directory "custom.el"))
-   #+END_SRC
+     (setq custom-file (file-name-concat user-emacs-directory "custom.el"))
+
+     (use-package
+       emacs
+       :ensure nil
+       :custom
+
+       ;; Should use:
+       ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+       ;; at least once per installation or while changing this list
+       (treesit-language-source-alist
+        '((heex "https://github.com/phoenixframework/tree-sitter-heex")
+          (elixir "https://github.com/elixir-lang/tree-sitter-elixir")))
+
+       (major-mode-remap-alist
+        '((elixir-mode . elixir-ts-mode)))
+       )
+
+
+    #+END_SRC
 
 ** Basic
   #+BEGIN_SRC emacs-lisp
     (setq user-full-name "larte"
-	   user-mail-address "lauri.arte@gmail.com")
+           user-mail-address "lauri.arte@gmail.com")
 
     (setq warning-minimum-level :error)
 
@@ -30,44 +48,137 @@
     (add-hook 'before-save-hook 'delete-trailing-whitespace)
     (prefer-coding-system 'utf-8)
     (setq coding-system-for-read 'utf-8
-	   coding-system-for-write 'utf-8)
+           coding-system-for-write 'utf-8)
     (setq scroll-step 1
       scroll-conservatively 10000
       auto-window-vscroll nil)
+
+
   #+END_SRC
 
 ** Appearance
  #+BEGIN_SRC emacs-lisp
-   (use-package doom-modeline :ensure t)
-   (use-package all-the-icons :ensure t)
-   (use-package doom-themes
-     :ensure t
-     :config
-     ;; Global settings (defaults)
-     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-     (load-theme 'doom-dark+ t)
+      (use-package doom-modeline :ensure t)
+      (use-package all-the-icons :ensure t)
+      (use-package doom-themes
+        :ensure t
+        :config
+        ;; Global settings (defaults)
+        (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+              doom-themes-enable-italic t) ; if nil, italics is universally disabled
+        (load-theme 'doom-dark+ t)
 
-     ;; Enable flashing mode-line on errors
-     (doom-themes-visual-bell-config)
-     ;; Enable custom neotree theme (all-the-icons must be installed!)
-     (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-     (doom-themes-treemacs-config)
-     ;; Corrects (and improves) org-mode's native fontification.
-     (doom-themes-org-config))
+        ;; Enable flashing mode-line on errors
+        (doom-themes-visual-bell-config)
+        ;; Enable custom neotree theme (all-the-icons must be installed!)
+        (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+        (doom-themes-treemacs-config)
+        ;; Corrects (and improves) org-mode's native fontification.
+        (doom-themes-org-config))
 
-   (if (daemonp)
-       (add-hook 'after-make-frame-functions
-                 (lambda (frame)
-                   (with-selected-frame frame (load-theme 'doom-dark+ t))))
-     (load-theme 'doom-dark+ t))
-   ;; Set default font
-   (set-face-attribute 'default nil
-                       :family "Source Code Pro"
-                       :height 110
-                       :weight 'normal
-                       :width 'normal)
+      (if (daemonp)
+          (add-hook 'after-make-frame-functions
+                    (lambda (frame)
+                      (with-selected-frame frame (load-theme 'doom-dark+ t))))
+        (load-theme 'doom-dark+ t))
+      ;; Set default font
+      (set-face-attribute 'default nil
+                          :family "Source Code Pro"
+                          :height 110
+                          :weight 'normal
+
+                        :width 'normal)
+      ;; Enable line numbering in `prog-mode'
+   (add-hook 'prog-mode-hook #'display-line-numbers-mode)
+
+   ;; Automatically pair parentheses
+   (electric-pair-mode t)
+
  #+END_SRC
+
+** Completions
+#+BEGIN_SRC emacs-lisp
+
+    ;;; Completion framework
+
+  (use-package vertico :ensure t)
+  (vertico-mode t)
+  (vertico-flat-mode t)
+
+  ;; Improve directory navigation
+  (with-eval-after-load 'vertico
+    (define-key vertico-map (kbd "RET") #'vertico-directory-enter)
+    (define-key vertico-map (kbd "DEL") #'vertico-directory-delete-word)
+    (define-key vertico-map (kbd "M-d") #'vertico-directory-delete-char))
+
+    ;;; Extended completion utilities
+  (use-package consult :ensure t)
+  (global-set-key [rebind switch-to-buffer] #'consult-buffer)
+  (global-set-key (kbd "C-c j") #'consult-line)
+
+  ;; Enable LSP support by default in programming buffers
+  (add-hook 'prog-mode-hook #'eglot-ensure)
+#+END_SRC
+
+** Treemacs
+#+BEGIN_SRC emacs-lisp
+    (use-package treemacs
+      :ensure t
+      :defer t
+      :init
+      (with-eval-after-load 'winum
+        (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+      :config
+      (progn
+        (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+              treemacs-deferred-git-apply-delay        0.5
+              treemacs-find-workspace-method           'find-for-file-or-pick-first
+              treemacs-git-command-pipe                ""
+              treemacs-goto-tag-strategy               'refetch-index
+              treemacs-header-scroll-indicators        '(nil . "^^^^^^")
+              treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+              treemacs-width                           35
+              treemacs-workspace-switch-cleanup        nil)
+
+        ;; The default width and height of the icons is 22 pixels. If you are
+        ;; using a Hi-DPI display, uncomment this to double the icon size.
+        ;;(treemacs-resize-icons 44)
+
+        (treemacs-follow-mode t)
+        (treemacs-filewatch-mode t)
+        (treemacs-fringe-indicator-mode 'always)
+        (when treemacs-python-executable
+          (treemacs-git-commit-diff-mode t))
+
+        (pcase (cons (not (null (executable-find "git")))
+                     (not (null treemacs-python-executable)))
+          (`(t . t)
+           (treemacs-git-mode 'deferred))
+          (`(t . _)
+           (treemacs-git-mode 'simple)))
+
+        (treemacs-hide-gitignored-files-mode nil))
+      )
+
+
+    (use-package treemacs-projectile
+      :after (treemacs projectile)
+      :ensure t)
+
+    (use-package treemacs-icons-dired
+      :hook (dired-mode . treemacs-icons-dired-enable-once)
+      :ensure t)
+
+    (use-package treemacs-magit
+      :after (treemacs magit)
+      :ensure t)
+
+    (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+      :after (treemacs)
+      :ensure t
+      :config (treemacs-set-scope-type 'Tabs))
+#+END_SRC
+
 
 ** Behaviour
  #+BEGIN_SRC emacs-lisp
@@ -98,11 +209,21 @@
 ** Magit
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :ensure t
-    :config
-    (add-to-list 'magit-no-confirm 'stage-all-changes)
-    (setq magit-push-always-verify nil)
-   )
+      :ensure t
+      :config
+      (add-to-list 'magit-no-confirm 'stage-all-changes)
+      (setq magit-push-always-verify nil)
+     )
+  ;; Bind the `magit-status' command to a convenient key.
+  (global-set-key (kbd "C-c g") #'magit-status)
+
+  ;;; Indication of local VCS changes
+  (use-package diff-hl :ensure t)
+
+  ;; Enable `diff-hl' support by default in programming buffers
+  (add-hook 'prog-mode-hook #'diff-hl-mode)
+
+
 #+END_SRC
 
 ** Treesitter
@@ -128,9 +249,11 @@
   (use-package erlang
     :ensure t
     :after tree-sitter)
-  (use-package elixir-mode
+  (use-package elixir-ts-mode
     :ensure t
-    :after tree-sitter)
+    :after tree-sitter
+
+    )
 
 
 #+END_SRC
@@ -160,6 +283,10 @@
           ;; by default, typescript-mode is mapped to the treesitter typescript parser
           ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
           (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+    (after! typescript-mode
+            (setq typescript-indent-level 2))
+
+    (add-hook 'typescript-mode-hook 'eglot-ensure)
   #+END_SRC
 
 
@@ -201,68 +328,67 @@
       )
 #+END_SRC
 
+** ELixir
+
+#+BEGIN_SRC emacs-lisp
+     (use-package
+       eglot
+       :ensure nil
+       :config (add-to-list 'eglot-server-programs '(elixir-mode "~/bin/elixir-ls/language_server.sh"))
+       :hook
+       ((typescript-mode . eglot-ensure)
+        (elixir-mode . eglot-ensure)
+        (elixir-ts-mode . eglot-ensure)
+        )
+       )
+
+     (use-package
+       elixir-ts-mode
+       :ensure t
+       :hook (elixir-ts-mode . eglot-ensure)
+       (elixir-ts-mode
+        .
+        (lambda ()
+          (push '(">=" . ?\u2265) prettify-symbols-alist)
+          (push '("<=" . ?\u2264) prettify-symbols-alist)
+          (push '("!=" . ?\u2260) prettify-symbols-alist)
+          (push '("==" . ?\u2A75) prettify-symbols-alist)
+          (push '("=~" . ?\u2245) prettify-symbols-alist)
+          (push '("<-" . ?\u2190) prettify-symbols-alist)
+          (push '("->" . ?\u2192) prettify-symbols-alist)
+          (push '("<-" . ?\u2190) prettify-symbols-alist)
+          (push '("|>" . ?\u25B7) prettify-symbols-alist)))
+       (before-save . eglot-format)
+       )
+
+#+END_SRC
+
+
 ** LSP
   #+BEGIN_SRC emacs-lisp
 
-    (use-package lsp-ui :ensure t)
-    (use-package js2-mode :ensure t)
-
-    (use-package lsp-mode
-      :ensure t
+    (use-package js2-mode :ensure t
       :config
-      (add-hook 'sh-mode 'lsp)
-      (add-hook 'elixir-mode 'lsp)
-      (add-hook 'typescript-mode-hook 'lsp)
-      (add-hook 'js2-mode-hook 'lsp)
-      (add-hook 'erlang-mode-hook 'lsp)
-      (add-hook 'elixir-mode-hook 'lsp)
+      (add-to-list 'auto-mode-alist '("\\.js?\\'" . js2-mode))
       )
-
     (use-package yasnippet :ensure t)
     (use-package lsp-treemacs :ensure t :commands lsp-treemacs-errors-list)
-    (setq lsp-language-id-configuration '((java-mode . "java")
-                                          (python-mode . "python")
-                                          (gfm-view-mode . "markdown")
-                                          (rust-mode . "rust")
-                                          (erlang-mode . "erlang")
-                                          (css-mode . "css")
-                                          (xml-mode . "xml")
-                                          (c-mode . "c")
-                                          (c++-mode . "cpp")
-                                          (web-mode . "html")
-                                          (html-mode . "html")
-                                          (sgml-mode . "html")
-                                          (mhtml-mode . "html")
-                                          (go-mode . "go")
-                                          (haskell-mode . "haskell")
-                                          (json-mode . "json")
-                                          (js2-mode . "javascript")
-                                          (typescript-mode . "typescript")))
-					  (python-mode . "python")
-					  (gfm-view-mode . "markdown")
-					  (rust-mode . "rust")
-					  (css-mode . "css")
-					  (xml-mode . "xml")
-					  (c-mode . "c")
-					  (c++-mode . "cpp")
-					  (web-mode . "html")
-					  (html-mode . "html")
-					  (sgml-mode . "html")
-					  (mhtml-mode . "html")
-					  (go-mode . "go")
-					  (haskell-mode . "haskell")
-					  (json-mode . "json")
-					  (js2-mode . "javascript")
-					  (typescript-mode . "typescript")))
+
   #+END_SRC
 
 ** Done
   #+BEGIN_SRC emacs-lisp
-  (run-with-idle-timer 4 nil
-                     (lambda ()
-                         "Clean up gc."
-                         (setq gc-cons-threshold  67108864) ; 64M
-                         (setq gc-cons-percentage 0.1) ; original value
-                         (garbage-collect)))
-    (provide 'init)
+
+    (on-hook after-init
+             (defkeys global-map
+                      "<f1>" treemacs
+                           ))
+
+        (run-with-idle-timer 4 nil
+                           (lambda ()
+                               "Clean up gc."
+                               (setq gc-cons-threshold  67108864) ; 64M
+                               (setq gc-cons-percentage 0.1) ; original value
+                               (garbage-collect)))
+          (provide 'init)
   #+END_SRC
