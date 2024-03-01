@@ -151,12 +151,19 @@
            (treemacs-git-mode 'simple)))
 
         (treemacs-hide-gitignored-files-mode nil))
-      )
+      :bind
+        (:map global-map
+          ("<f1>" . #'treemacs)
+          )
+    )
 
 
-    (use-package treemacs-projectile
-      :after (treemacs projectile)
-      :ensure t)
+  (use-package treemacs-projectile
+    :after (treemacs projectile)
+    :ensure t
+    :bind (:map global-map ("C-c o t" . treemacs-projectile))
+    )
+
 
     (use-package treemacs-icons-dired
       :hook (dired-mode . treemacs-icons-dired-enable-once)
