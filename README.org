@@ -335,35 +335,36 @@
 ** ELixir
 
 #+BEGIN_SRC emacs-lisp
-     (use-package
-       eglot
-       :ensure nil
-       :config (add-to-list 'eglot-server-programs '(elixir-mode "~/bin/elixir-ls/language_server.sh"))
-       :hook
-       ((typescript-mode . eglot-ensure)
-        (elixir-mode . eglot-ensure)
-        (elixir-ts-mode . eglot-ensure)
-        )
-       )
+  (use-package
+    eglot
+    :ensure nil
+    :config (add-to-list 'eglot-server-programs '(elixir-ts-mode "~/bin/elixir-ls/language_server.sh"))
+    :hook
+    ((typescript-mode . eglot-ensure)
+     (elixir-mode . eglot-ensure)
+     (elixir-ts-mode . eglot-ensure)
+     (prog-mode . eglot-ensure)
+     )
+    )
 
-     (use-package
-       elixir-ts-mode
-       :ensure t
-       :hook (elixir-ts-mode . eglot-ensure)
-       (elixir-ts-mode
-        .
-        (lambda ()
-          (push '(">=" . ?\u2265) prettify-symbols-alist)
-          (push '("<=" . ?\u2264) prettify-symbols-alist)
-          (push '("!=" . ?\u2260) prettify-symbols-alist)
-          (push '("==" . ?\u2A75) prettify-symbols-alist)
-          (push '("=~" . ?\u2245) prettify-symbols-alist)
-          (push '("<-" . ?\u2190) prettify-symbols-alist)
-          (push '("->" . ?\u2192) prettify-symbols-alist)
-          (push '("<-" . ?\u2190) prettify-symbols-alist)
-          (push '("|>" . ?\u25B7) prettify-symbols-alist)))
-       (before-save . eglot-format)
-       )
+  (use-package
+    elixir-ts-mode
+    :ensure t
+    :hook (elixir-ts-mode . eglot-ensure)
+    (elixir-ts-mode
+     .
+     (lambda ()
+       (push '(">=" . ?\u2265) prettify-symbols-alist)
+       (push '("<=" . ?\u2264) prettify-symbols-alist)
+       (push '("!=" . ?\u2260) prettify-symbols-alist)
+       (push '("==" . ?\u2A75) prettify-symbols-alist)
+       (push '("=~" . ?\u2245) prettify-symbols-alist)
+       (push '("<-" . ?\u2190) prettify-symbols-alist)
+       (push '("->" . ?\u2192) prettify-symbols-alist)
+       (push '("<-" . ?\u2190) prettify-symbols-alist)
+       (push '("|>" . ?\u25B7) prettify-symbols-alist)))
+    (before-save . eglot-format)
+    )
 
 #+END_SRC
 
@@ -380,9 +381,21 @@
 
   #+END_SRC
 
+** Markdown
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown")
+  :bind (:map markdown-mode-map
+         ("C-c C-e" . markdown-do)))
+#+END_SRC
+
+
 ** Done
   #+BEGIN_SRC emacs-lisp
     (global-set-key (kbd "<f1>") #'treemacs)
+
     (run-with-idle-timer 4 nil
                          (lambda ()
                            "Clean up gc."
