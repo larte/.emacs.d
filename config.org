@@ -2,7 +2,7 @@
 
 * About
 
-That's it, going back to doom.
+That's it, going back to doom. Install [https://github.com/doomemacs/doomemacs](Doom emacs) according to instructions. Checkout this repo to ~/.config/doom.
 
 #+BEGIN_SRC emacs-lisp
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
